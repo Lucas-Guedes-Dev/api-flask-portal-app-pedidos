@@ -13,19 +13,38 @@ def produto():
         data = request.get_json()
         
         for dt in data['produto']:
-            produtos_db = query.select('produtos', ['descricao', 'ativo', 'id_integracao'],
-            ['id_integracao = {}'.format(str(dt['id_integracao']))])
+            print(dt)
+            try:
+                produtos_db = query.select('produtos', ['descricao', 'ativo', 'id_integracao'],
+                ['id_integracao = {}'.format(str(dt['id_integracao']))])
 
-            if produtos_db:
-                query.update('produtos', 
-                ["ativo={}".format(dt['ativo']), 
-                "descricao='{}'".format(dt['descricao'])],
-                ["id_integracao={}".format(dt['id_integracao'])])
-            else:
-                query.insert('produtos', ['descricao', 'ativo', 'id_integracao'], 
-                [str("'{}'".format(dt['descricao'])), str(dt['ativo']), str(dt['id_integracao'])])
+                if produtos_db:
+                    query.update('produtos', 
+                        [
+                            "ativo={}".format(dt['ativo']), 
+                            "descricao='{}'".format(dt['descricao'])
+                        ],
+                        [
+                            "id_integracao={}".format(dt['id_integracao'])
+                        ]
+                    )
+                else:
+                    query.insert('produtos',
+                        ['descricao', 'ativo', 'id_integracao'], 
+                        [
+                            str("'{}'".format(dt['descricao'])),
+                            str(dt['ativo']),
+                            str(dt['id_integracao'])
+                        ]
+                    )
 
-        return data
+                message = {"Sucesso": "Produtos inseridos ou alterados com sucesso."}
+
+            except KeyError: 
+                message = {"Error": "Parametros inválidos"}
+                break
+
+        return jsonify(message)
 
 if __name__ == '__main__':
     app.run(debug=True)
