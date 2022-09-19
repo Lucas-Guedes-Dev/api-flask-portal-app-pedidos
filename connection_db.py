@@ -66,10 +66,14 @@ class Querys(Connection):
 
         self.cursor.execute(query)
         self.connection.commit()
+    
+    def update(self, table=str, set=list, where=None):
+        
+        if where:
+            query = 'UPDATE {tabela} SET {set} WHERE {where}'.format(tabela=table, 
+            set=', '.join(set), where=' and '.join(where))
+        else:
+            query = 'UPDATE {tabela} SET {set}'.format(table, set)
 
-query = Querys()
-# query.insert('produtos', ['descricao', 'ativo'], ["'produto 2'", 'true'])
-# query.delete('produtos', ['id=6'])
-sel = query.select('produtos', ['id', 'descricao', 'ativo'])
-
-print(sel)
+        self.cursor.execute(query)
+        self.connection.commit()
