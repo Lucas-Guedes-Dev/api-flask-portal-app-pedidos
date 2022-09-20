@@ -6,16 +6,19 @@ create table if not exists produtos (
 );
 
 
-create table if not exists pedidos (
-	id serial primary key,
-	produto_id int,
-	quantidade int,
-	data_pedido date,
-	CONSTRAiNT fk_produto
-		FOREIGN KEY(produto_id)
+create table pedidos (
+	id_pedido serial primary key,
+	id_integracao bigint,
+	quantidade double precision,
+	id_produto bigint,
+	valor_produto double precision,
+	observacao varchar(200),
+	valor_total_pedido double precision,
+	data_pedido timestamp,
+	CONSTRAINT fk_produto
+		FOREIGN KEY(id_produto)
 			REFERENCES produtos(id)
 );
-
 -- drop table pedidos;
 
 create table if not exists produtos (

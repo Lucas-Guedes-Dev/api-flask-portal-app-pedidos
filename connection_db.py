@@ -47,7 +47,11 @@ class Querys(Connection):
         else:
             query = 'SELECT {campos} from {tabela}'.format(campos = ','.join(fields), tabela = table)
         
-        self.cursor.execute(query)
+        try:
+            self.cursor.execute(query)
+        except psycopg2.errors.InFailedSqlTransaction:
+            self.cursor.execute("ROLLBACK")
+            self.cursor.execute(query)
 
         fetch = self.cursor.fetchall()
 
@@ -57,15 +61,28 @@ class Querys(Connection):
 
         query = 'INSERT INTO {tabela} ({campos}) values ({valores})'.format(tabela=table, campos=','.join(fields), valores=','.join(values))
         
-        self.cursor.execute(query)
-        self.connection.commit()
-    
+        try:
+            self.cursor.execute(query)
+            self.connection.commit()
+        except psycopg2.errors.InFailedSqlTransaction:
+            self.cursor.execute("ROLLBACK")
+            self.connection.commit()
+            self.cursor.execute(query)
+            self.connection.commit()
+
+
     def delete(self, table=str, where=list):
         
         query = 'DELETE FROM {tabela} WHERE {condicao}'.format(tabela=table, condicao=' and '.join(where))
 
-        self.cursor.execute(query)
-        self.connection.commit()
+        try:
+            self.cursor.execute(query)
+            self.connection.commit()
+        except psycopg2.errors.InFailedSqlTransaction:
+            self.cursor.execute("ROLLBACK")
+            self.connection.commit()
+            self.cursor.execute(query)
+            self.connection.commit()
     
     def update(self, table=str, set=list, where=None):
         
@@ -75,5 +92,11 @@ class Querys(Connection):
         else:
             query = 'UPDATE {tabela} SET {set}'.format(table, set)
 
-        self.cursor.execute(query)
-        self.connection.commit()
+        try:
+            self.cursor.execute(query)
+            self.connection.commit()
+        except psycopg2.errors.InFailedSqlTransaction:
+            self.cursor.execute("ROLLBACK")
+            self.connection.commit()
+            self.cursor.execute(query)
+            self.connection.commit()
